@@ -20,7 +20,7 @@ class SupabaseStore:
             settings.supabase_url, settings.supabase_anon_key
         )
 
-    def _upsert_sync(self, payload: ToonPayload) -> None:
+    def _insert_sync(self, payload: ToonPayload) -> None:
         game = payload.game
         row: dict[str, Any] = {
             "game_id": game.game_id,
@@ -32,11 +32,11 @@ class SupabaseStore:
             "toon_payload": payload.model_dump(mode="json"),
             "updated_at": payload.timestamp.isoformat(),
         }
-        self._client.table(TABLE).upsert(row, on_conflict="game_id").execute()
+        self._client.table(TABLE).insert(row).execute()
 
     async def upsert_game(self, payload: ToonPayload) -> None:
-        await asyncio.to_thread(self._upsert_sync, payload)
-        logger.info("upserted_game", game_id=payload.game.game_id)
+        await asyncio.to_thread(self._insert_sync, payload)
+        logger.info("inserted_game_snapshot", game_id=payload.game.game_id)
 
     def _get_all_sync(self) -> list[dict[str, Any]]:
         resp = self._client.table(TABLE).select("*").execute()

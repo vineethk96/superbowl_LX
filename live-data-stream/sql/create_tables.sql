@@ -1,6 +1,7 @@
--- Supabase table for live NFL game data
+-- Supabase table for live NFL game data (historical snapshots)
 CREATE TABLE IF NOT EXISTS live_games (
-    game_id   TEXT PRIMARY KEY,
+    whalesync_postgres_id BIGSERIAL PRIMARY KEY,
+    game_id   TEXT NOT NULL,
     status    TEXT NOT NULL,
     quarter   INTEGER NOT NULL DEFAULT 0,
     clock     TEXT NOT NULL DEFAULT '0:00',
@@ -9,6 +10,9 @@ CREATE TABLE IF NOT EXISTS live_games (
     toon_payload JSONB NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Index for querying by game_id and timestamp
+CREATE INDEX IF NOT EXISTS idx_live_games_game_id ON live_games (game_id, updated_at DESC);
 
 -- Index for querying by status
 CREATE INDEX IF NOT EXISTS idx_live_games_status ON live_games (status);
